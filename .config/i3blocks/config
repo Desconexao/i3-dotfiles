@@ -1,0 +1,43 @@
+# i3blocks configuration file
+#
+# The i3blocks man page describes the usage of the binary,
+# and its website describes the configuration:
+#
+#     https://vivien.github.io/i3blocks
+
+
+# Global properties
+separator=true
+separator_block_width=10
+
+[brightness]
+command=/home/vinicius/.config/i3blocks/brightness
+interval=1
+
+[volume]
+command=/home/vinicius/.config/i3blocks/volume
+interval=1
+
+[battery]
+command=level=$(cat /sys/class/power_supply/BAT0/capacity); printf 'Battery %s%%\n%s%%\n' "$level" "$level"
+interval=5
+
+[power]
+command=printf 'Power %s\n%s\n' "$(powerprofilesctl get)" "$(powerprofilesctl get)"
+interval=2
+
+[disk]
+command=df -h / | awk 'NR==2 {print "Disk " $4 "\n" $4}'
+interval=30
+
+[load]
+command=awk '{print "CPU " $1 "\n" $1}' /proc/loadavg
+interval=5
+
+[memory]
+command=free -h | awk '/Mem:/ {print "Memory " $3 "/" $2 "\n" $3 "/" $2}'
+interval=5
+
+[time]
+command=/home/vinicius/.config/i3blocks/calendar
+interval=1

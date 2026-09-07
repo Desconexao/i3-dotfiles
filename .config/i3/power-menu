@@ -1,0 +1,18 @@
+#!/bin/sh
+
+choice="$(printf '%s\n' 'Lock' 'Log out' 'Restart' 'Power off' | rofi -dmenu -i -p 'Power')"
+
+case "$choice" in
+    Lock)
+        exec /home/vinicius/.config/i3/lock-screen
+        ;;
+    'Log out')
+        zenity --question --title='Log out' --text='Log out of this session?' && i3-msg exit
+        ;;
+    Restart)
+        zenity --question --title='Restart' --text='Restart the computer?' && systemctl reboot
+        ;;
+    'Power off')
+        zenity --question --title='Power off' --text='Power off the computer?' && systemctl poweroff
+        ;;
+esac

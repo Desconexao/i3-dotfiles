@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ "${BLOCK_BUTTON:-}" = "1" ]; then
+    zenity --calendar --title='Calendar' --text='Choose a date' --date-format='%d/%m/%Y' >/dev/null 2>&1 &
+fi
+
+date '+%d %b · %H:%M'

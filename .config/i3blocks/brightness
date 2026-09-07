@@ -1,0 +1,14 @@
+#!/bin/sh
+
+case "${BLOCK_BUTTON:-}" in
+    4) brightnessctl set +5% >/dev/null 2>&1 ;;
+    5) brightnessctl set 5%- >/dev/null 2>&1 ;;
+esac
+
+level="$(brightnessctl -m 2>/dev/null | awk -F, 'NR == 1 {print $4}')"
+
+if [ -n "$level" ]; then
+    printf 'Brightness %s\n%s\n' "$level" "$level"
+else
+    printf 'Brightness unavailable\nBrightness\n'
+fi

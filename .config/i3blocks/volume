@@ -1,0 +1,19 @@
+#!/bin/sh
+
+case "${BLOCK_BUTTON:-}" in
+    1) wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+    3) pavucontrol >/dev/null 2>&1 & ;;
+    4) wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ ;;
+    5) wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- ;;
+esac
+
+audio_state="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null || true)"
+volume="$(printf '%s\n' "$audio_state" | awk 'NF >= 2 {printf "%.0f%%", $2 * 100}')"
+
+if printf '%s\n' "$audio_state" | grep -q '\[MUTED\]'; then
+    printf 'Volume mute\nMute\n'
+elif [ -n "$volume" ]; then
+    printf 'Volume %s\n%s\n' "$volume" "$volume"
+else
+    printf 'Volume unavailable\nVolume\n'
+fi
