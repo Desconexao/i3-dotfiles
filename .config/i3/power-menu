@@ -4,7 +4,7 @@ choice="$(printf '%s\n' 'Lock' 'Log out' 'Restart' 'Power off' | rofi -dmenu -i 
 
 case "$choice" in
     Lock)
-        exec /home/vinicius/.config/i3/lock-screen
+        exec "$HOME/.config/i3/lock-screen"
         ;;
     'Log out')
         zenity --question --title='Log out' --text='Log out of this session?' && i3-msg exit

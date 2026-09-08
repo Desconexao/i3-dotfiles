@@ -1,0 +1,53 @@
+#!/bin/sh
+# Small, dependency-aware actions used by the i3 configuration.
+set -eu
+
+has() { command -v "$1" >/dev/null 2>&1; }
+
+case "${1:-}" in
+    network-applet) has nm-applet && exec nm-applet ;;
+    prewarm-terminal) has kitty && exec kitty --single-instance --class kitty-prewarm ;;
+    terminal)
+        if has kitty; then exec kitty --single-instance; fi
+        exec i3-sensible-terminal
+        ;;
+    browser)
+        if [ -n "${BROWSER:-}" ] && has "$BROWSER"; then exec "$BROWSER"; fi
+        if has brave-browser; then exec brave-browser; fi
+        if has firefox; then exec firefox; fi
+        ;;
+    files)
+        if has nautilus; then exec nautilus --new-window; fi
+        if has thunar; then exec thunar; fi
+        has xdg-open && exec xdg-open "$HOME"
+        ;;
+    configure-input)
+        has xinput || exit 0
+        xinput list --name-only 2>/dev/null | awk '/[Tt]ouchpad/' | while IFS= read -r device; do
+            xinput set-prop "$device" 'libinput Tapping Enabled' 1 2>/dev/null || true
+            xinput set-prop "$device" 'libinput Natural Scrolling Enabled' 1 2>/dev/null || true
+        done
+        ;;
+    wallpaper)
+        wallpaper_file="$HOME/.config/i3/wallpaper"
+        [ -r "$wallpaper_file" ] || exit 0
+        IFS= read -r wallpaper_path < "$wallpaper_file" || exit 0
+        [ -f "$wallpaper_path" ] && has feh && exec feh --bg-fill "$wallpaper_path"
+        ;;
+    volume)
+        has wpctl || exit 0
+        case "${2:-}" in
+            up) exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%+ ;;
+            down) exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%- ;;
+            mute) exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+            mic-mute) exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
+        esac
+        ;;
+    brightness)
+        has brightnessctl || exit 0
+        case "${2:-}" in up) exec brightnessctl set +5% ;; down) exec brightnessctl set 5%- ;; esac
+        ;;
+    power-profile)
+        has powerprofilesctl && exec powerprofilesctl set "${2:?profile required}"
+        ;;
+esac

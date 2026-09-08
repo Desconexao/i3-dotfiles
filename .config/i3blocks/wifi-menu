@@ -1,0 +1,45 @@
+#!/bin/sh
+# Graphical NetworkManager selector for the Wi-Fi i3blocks button.
+
+networks="$(nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY device wifi list --rescan auto 2>/dev/null | awk -F: '
+    NF >= 4 && $2 != "" {
+        ssid = $2; signal = $3 + 0
+        if (!(ssid in seen)) { seen[ssid] = 1; order[++count] = ssid }
+        if (!(ssid in best) || signal > best[ssid]) {
+            best[ssid] = signal
+            security[ssid] = ($4 == "--" || $4 == "") ? "Open" : $4
+        }
+        if ($1 == "*") connected[ssid] = 1
+    }
+    END {
+        for (i = 1; i <= count; i++) {
+            ssid = order[i]
+            print ssid "|" best[ssid] "%|" security[ssid] "|" (connected[ssid] ? "Connected" : "")
+        }
+    }
+')"
+
+if [ -z "$networks" ]; then
+    zenity --error --title='Wi-Fi' --text='No Wi-Fi networks were found.'
+    exit 0
+fi
+
+set -- --list --title='Connect to Wi-Fi' --text='Choose a Wi-Fi network' --width=560 --height=420 --column='Network' --column='Signal' --column='Security' --column='Status' --separator='|'
+while IFS='|' read -r network_name network_signal network_security network_status; do
+    set -- "$@" "$network_name" "$network_signal" "$network_security" "$network_status"
+done <<EOF
+$networks
+EOF
+selection="$(zenity "$@")" || exit 0
+ssid="${selection%%|*}"
+remainder="${selection#*|}"
+security="${remainder#*|}"; security="${security%%|*}"
+
+if [ "$security" = Open ]; then
+    result="$(nmcli device wifi connect "$ssid" 2>&1)" || { zenity --error --title='Wi-Fi' --text="$result"; exit 0; }
+else
+    password="$(zenity --password --title="Password for $ssid" --text="Enter the Wi-Fi password for $ssid")" || exit 0
+    result="$(nmcli device wifi connect "$ssid" password "$password" 2>&1)" || { zenity --error --title='Wi-Fi' --text="$result"; exit 0; }
+fi
+
+zenity --info --title='Wi-Fi' --text="Connected to $ssid."

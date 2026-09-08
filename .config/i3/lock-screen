@@ -1,7 +1,7 @@
 #!/bin/sh
 # Visual lock screen matching the i3bar palette, with a safe i3lock fallback.
 
-lock_color="/home/vinicius/.local/bin/i3lock-color"
+lock_color="$HOME/.local/bin/i3lock-color"
 
 if [ -x "$lock_color" ]; then
     "$lock_color" -n -c 1e1e2e --clock --bar-indicator \

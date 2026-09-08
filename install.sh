@@ -2,13 +2,37 @@
 
 set -eu
 
-if [ "${1:-}" != "--apply" ]; then
-    printf '%s\n' "Usage: ./install.sh --apply"
-    exit 1
+repo_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+mode="${1:-}"
+
+case "$mode" in
+    --check) exec "$repo_dir/tests/smoke.sh" ;;
+    --dry-run|--apply) ;;
+    *)
+        printf '%s\n' 'Usage: ./install.sh --check | --dry-run | --apply'
+        exit 1
+        ;;
+esac
+
+if [ "$mode" = --dry-run ]; then
+    printf '%s\n' "Would install i3, i3blocks, Kitty, GTK and Zsh files from: $repo_dir"
+    exit 0
 fi
 
-repo_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 backup_dir="$HOME/.i3-dotfiles-backup-$(date +%Y%m%d-%H%M%S)"
+
+preserve_existing_wallpaper() {
+    current_config="$HOME/.config/i3/config"
+    wallpaper_file="$HOME/.config/i3/wallpaper"
+    [ -e "$wallpaper_file" ] && return 0
+    [ -r "$current_config" ] || return 0
+
+    wallpaper_path="$(sed -n 's/.*feh --bg-fill //p' "$current_config" | head -n 1)"
+    [ -n "$wallpaper_path" ] || return 0
+    case "$wallpaper_path" in '~/'*) wallpaper_path="$HOME/${wallpaper_path#~/}" ;; esac
+    [ -f "$wallpaper_path" ] || return 0
+    printf '%s\n' "$wallpaper_path" > "$wallpaper_file"
+}
 
 backup_and_copy() {
     source_path="$1"
@@ -20,9 +44,17 @@ backup_and_copy() {
     fi
 
     mkdir -p "$(dirname "$target_path")"
-    cp -a "$source_path" "$target_path"
+    if [ -d "$source_path" ]; then
+        # Copy directory contents instead of creating ~/.config/i3/i3 when the
+        # destination already exists.
+        mkdir -p "$target_path"
+        cp -a "$source_path/." "$target_path/"
+    else
+        cp -a "$source_path" "$target_path"
+    fi
 }
 
+preserve_existing_wallpaper
 backup_and_copy "$repo_dir/.config/i3" "$HOME/.config/i3"
 backup_and_copy "$repo_dir/.config/i3blocks" "$HOME/.config/i3blocks"
 backup_and_copy "$repo_dir/.config/kitty" "$HOME/.config/kitty"

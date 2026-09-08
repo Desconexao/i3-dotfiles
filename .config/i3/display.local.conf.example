@@ -1,0 +1,3 @@
+# Optional per-machine display override. Copy to display.local.conf and uncomment
+# a value only when the automatic highest-resolution selection is not desired.
+# SECONDARY_MODE=1920x1080

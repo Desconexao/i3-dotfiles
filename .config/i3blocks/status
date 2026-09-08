@@ -1,0 +1,70 @@
+#!/bin/sh
+
+. "$HOME/.config/i3blocks/theme"
+block="$1"
+label="$(bar_label "$block")"
+
+case "$block" in
+wifi)
+    case "${BLOCK_BUTTON:-}" in
+        # Graphical selector: shows nearby networks, signal and security.
+        1) [ -x "$HOME/.config/i3blocks/wifi-menu" ] && "$HOME/.config/i3blocks/wifi-menu" >/dev/null 2>&1 & ;;
+        # Right click opens NetworkManager's graphical connection editor.
+        3) nm-connection-editor >/dev/null 2>&1 & ;;
+    esac
+    network="$(nmcli -t -f ACTIVE,SSID,SIGNAL device wifi 2>/dev/null | awk -F: '$1 == "yes" {print $2 "|" $3; exit}')"
+    ssid="${network%%|*}"; signal="${network#*|}"
+    [ "$ssid" = "$network" ] && ssid=''
+    if [ -n "$ssid" ]; then printf '%s %s %s%%\n%s\n' "$label" "$ssid" "$signal" "$ssid"; else printf '%s down\ndown\n' "$label"; fi
+    ;;
+ethernet)
+    for path in /sys/class/net/en* /sys/class/net/eth*; do
+        [ -e "$path" ] || continue
+        if [ "$(cat "$path/carrier" 2>/dev/null)" = 1 ]; then iface="$(basename "$path")"; printf '%s %s\n%s\n' "$label" "$iface" "$iface"; exit 0; fi
+    done
+    exit 0
+    ;;
+volume)
+    case "${BLOCK_BUTTON:-}" in
+        1) wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;; 3) pavucontrol >/dev/null 2>&1 & ;;
+        4) wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ ;; 5) wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- ;;
+    esac
+    audio="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null || true)"
+    volume="$(printf '%s\n' "$audio" | awk 'NF >= 2 {printf "%.0f%%", $2 * 100}')"
+    if printf '%s\n' "$audio" | grep -q '\[MUTED\]'; then printf '%s mute\nMute\n' "$(bar_label mute)"; elif [ -n "$volume" ]; then printf '%s %s\n%s\n' "$label" "$volume" "$volume"; else printf '%s unavailable\n?\n' "$label"; fi
+    ;;
+battery)
+    battery_dir="$(find /sys/class/power_supply -maxdepth 1 -type d -name 'BAT*' 2>/dev/null | head -n 1)"
+    capacity="$(cat "$battery_dir/capacity" 2>/dev/null || true)"
+    state="$(cat "$battery_dir/status" 2>/dev/null || true)"
+    if [ -n "$capacity" ]; then printf '%s %s%% · %s\n%s%%\n' "$label" "$capacity" "$state" "$capacity"; else printf '%s unavailable\n?\n' "$label"; fi
+    ;;
+power)
+    profile="$(powerprofilesctl get 2>/dev/null || true)"
+    if [ -n "$profile" ]; then printf '%s %s\n%s\n' "$label" "$profile" "$profile"; else printf '%s unavailable\n?\n' "$label"; fi
+    ;;
+temperature)
+    # Prefer the CPU package temperature reported by lm-sensors; Dell virtual
+    # sensors and /sys are fallbacks for machines without coretemp.
+    value="$(sensors 2>/dev/null | awk '/^Package id 0:/ {v=$4; gsub(/[^0-9.]/, "", v); print int(v); exit} /^CPU:/ {v=$2; gsub(/[^0-9.]/, "", v); print int(v); exit}')"
+    if [ -z "$value" ]; then
+        source="$(find /sys/class/thermal /sys/class/hwmon -type f \( -name temp -o -name 'temp*_input' \) 2>/dev/null | head -n 1)"
+        raw_value="$(cat "$source" 2>/dev/null || true)"
+        case "$raw_value" in *[!0-9]*|'') ;; *) value=$((raw_value / 1000)) ;; esac
+    fi
+    if [ -n "$value" ]; then printf '%s %s°C\n%s°C\n' "$label" "$value" "$value"; else printf '%s unavailable\n?\n' "$label"; fi
+    ;;
+disk)
+    value="$(df -h / | awk 'NR == 2 {print $4}')"; printf '%s %s free\n%s\n' "$label" "$value" "$value"
+    ;;
+cpu)
+    value="$(awk '{print $1}' /proc/loadavg)"; printf '%s %s\n%s\n' "$label" "$value" "$value"
+    ;;
+memory)
+    value="$(free -h | awk '/Mem:/ {print $3 "/" $2}')"; printf '%s %s\n%s\n' "$label" "$value" "$value"
+    ;;
+time)
+    [ "${BLOCK_BUTTON:-}" = 1 ] && zenity --calendar --title='Calendar' --date-format='%d/%m/%Y' >/dev/null 2>&1 &
+    printf '%s ' "$label"; date '+%d %b · %H:%M'
+    ;;
+esac

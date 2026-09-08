@@ -1,43 +1,46 @@
-# i3blocks configuration file
-#
-# The i3blocks man page describes the usage of the binary,
-# and its website describes the configuration:
-#
-#     https://vivien.github.io/i3blocks
-
-
-# Global properties
+# Appearance is centralized in ../i3/bar-theme.conf and labels/icons in ./theme.
+# BLOCK SPACING — change this number to adjust the horizontal space between blocks.
 separator=true
-separator_block_width=10
+separator_block_width=14
+color=#cdd6f4
+background=#1e1e2e
 
-[brightness]
-command=/home/vinicius/.config/i3blocks/brightness
-interval=1
+[wifi]
+command=$HOME/.config/i3blocks/status wifi
+interval=10
+
+[ethernet]
+command=$HOME/.config/i3blocks/status ethernet
+interval=10
 
 [volume]
-command=/home/vinicius/.config/i3blocks/volume
+command=$HOME/.config/i3blocks/status volume
 interval=1
 
 [battery]
-command=level=$(cat /sys/class/power_supply/BAT0/capacity); printf 'Battery %s%%\n%s%%\n' "$level" "$level"
+command=$HOME/.config/i3blocks/status battery
 interval=5
 
 [power]
-command=printf 'Power %s\n%s\n' "$(powerprofilesctl get)" "$(powerprofilesctl get)"
-interval=2
+command=$HOME/.config/i3blocks/status power
+interval=5
+
+[temperature]
+command=$HOME/.config/i3blocks/status temperature
+interval=10
 
 [disk]
-command=df -h / | awk 'NR==2 {print "Disk " $4 "\n" $4}'
+command=$HOME/.config/i3blocks/status disk
 interval=30
 
-[load]
-command=awk '{print "CPU " $1 "\n" $1}' /proc/loadavg
+[cpu]
+command=$HOME/.config/i3blocks/status cpu
 interval=5
 
 [memory]
-command=free -h | awk '/Mem:/ {print "Memory " $3 "/" $2 "\n" $3 "/" $2}'
+command=$HOME/.config/i3blocks/status memory
 interval=5
 
 [time]
-command=/home/vinicius/.config/i3blocks/calendar
+command=$HOME/.config/i3blocks/status time
 interval=1
