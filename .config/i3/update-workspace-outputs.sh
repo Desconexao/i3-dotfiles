@@ -71,7 +71,7 @@ if [ "${1:-}" = --watch ]; then
     exec 9>"$lock_file"
     flock -n 9 || exit 0
     apply_layout
-    i3-msg -t subscribe '["output"]' | while IFS= read -r _event; do apply_layout; done
+    i3-msg -t subscribe -m '["output"]' | while IFS= read -r _event; do apply_layout; done
 else
     apply_layout
 fi
