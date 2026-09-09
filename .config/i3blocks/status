@@ -34,7 +34,12 @@ volume)
     if printf '%s\n' "$audio" | grep -q '\[MUTED\]'; then printf '%s mute\nMute\n' "$(bar_label mute)"; elif [ -n "$volume" ]; then printf '%s %s\n%s\n' "$label" "$volume" "$volume"; else printf '%s unavailable\n?\n' "$label"; fi
     ;;
 battery)
-    battery_dir="$(find /sys/class/power_supply -maxdepth 1 -type d -name 'BAT*' 2>/dev/null | head -n 1)"
+    battery_dir=''
+    for candidate in /sys/class/power_supply/BAT*; do
+        [ -r "$candidate/capacity" ] || continue
+        battery_dir="$candidate"
+        break
+    done
     capacity="$(cat "$battery_dir/capacity" 2>/dev/null || true)"
     state="$(cat "$battery_dir/status" 2>/dev/null || true)"
     if [ -n "$capacity" ]; then printf '%s %s%% · %s\n%s%%\n' "$label" "$capacity" "$state" "$capacity"; else printf '%s unavailable\n?\n' "$label"; fi
