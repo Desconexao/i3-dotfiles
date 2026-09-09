@@ -20,6 +20,9 @@ include ~/.config/i3/window-gaps.conf
 # Window-title font. The bar font and colors are configured in bar-theme.conf.
 font pango:JetBrainsMono Nerd Font 10
 
+# Window-title position: left, center or right.
+title_align center
+
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:DejaVu Sans Mono 8
