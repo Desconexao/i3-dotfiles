@@ -1,7 +1,14 @@
 #!/bin/sh
 # Visual lock screen matching the i3bar palette, with a safe i3lock fallback.
 
-lock_color="$HOME/.local/bin/i3lock-color"
+# The AUR package i3lock-color-git replaces /usr/bin/i3lock. A manually
+# installed build may instead live in ~/.local/bin/i3lock-color.
+lock_color=""
+if pacman -Qq i3lock-color-git >/dev/null 2>&1; then
+    lock_color="/usr/bin/i3lock"
+elif [ -x "$HOME/.local/bin/i3lock-color" ]; then
+    lock_color="$HOME/.local/bin/i3lock-color"
+fi
 
 if [ -x "$lock_color" ]; then
     "$lock_color" -n -c 1e1e2e --clock --bar-indicator \
@@ -21,4 +28,35 @@ if [ -x "$lock_color" ]; then
     [ "$lock_status" -eq 0 ] && exit 0
 fi
 
-exec /usr/bin/i3lock -n -c 1e1e2e
+screen_geometry() {
+    xrandr --query 2>/dev/null |
+        awk '/^Screen [0-9]+:/ { for (i = 1; i <= NF; i++) if ($i == "current") { print $(i + 1) "x" $(i + 3); exit } }'
+}
+
+geometry="$(screen_geometry)"
+geometry="${geometry:-1920x1080}"
+width="${geometry%x*}"
+height="${geometry#*x}"
+center_x=$((width / 2))
+center_y=$((height / 2))
+lock_image="${XDG_RUNTIME_DIR:-/tmp}/i3lock-$USER.png"
+
+# A Tokyo Night background made at lock time, so it fills every connected
+# monitor without requiring a wallpaper or an external screenshot utility.
+if command -v magick >/dev/null 2>&1 && magick \
+    -size "$geometry" gradient:'#101424-#1a1b36' \
+    -fill '#7aa2f733' -draw "circle 0,0 560,0" \
+    -fill '#bb9af744' -draw "circle $width,$height $((width - 700)),$height" \
+    -fill '#7dcfff22' -draw "circle $center_x,$center_y $((center_x + 420)),$center_y" \
+    -font /usr/share/fonts/TTF/FiraCodeNerdFont-Regular.ttf -gravity center \
+    -fill '#7aa2f7' -pointsize 18 -annotate +0-210 'BLOQUEADO' \
+    -fill '#c0caf5' -pointsize 86 -annotate +0-100 "$(date '+%H:%M')" \
+    -fill '#a9b1d6' -pointsize 22 -annotate +0-35 "$(date '+%A, %d de %B')" \
+    -fill '#565f89' -pointsize 16 -annotate +0+180 'Digite sua senha para desbloquear' \
+    "$lock_image"; then
+    trap 'rm -f "$lock_image"' EXIT HUP INT TERM
+    /usr/bin/i3lock -n -i "$lock_image"
+    exit $?
+fi
+
+exec /usr/bin/i3lock -n -c 101424
