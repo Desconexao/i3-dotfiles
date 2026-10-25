@@ -20,17 +20,38 @@ networks="$(nmcli -t -f IN-USE,SSID,SIGNAL,SECURITY device wifi list --rescan au
 ')"
 
 if [ -z "$networks" ]; then
-    zenity --error --title='Wi-Fi' --text='No Wi-Fi networks were found.'
+    if command -v rofi >/dev/null 2>&1; then
+        rofi -theme "$HOME/.config/i3/menu.rasi" -e 'No Wi-Fi networks found. Check that your Wi-Fi adapter is enabled.'
+    else
+        zenity --error --title='Wi-Fi' --text='No Wi-Fi networks were found.'
+    fi
     exit 0
 fi
 
-set -- --list --title='Connect to Wi-Fi' --text='Choose a Wi-Fi network' --width=560 --height=420 --column='Network' --column='Signal' --column='Security' --column='Status' --separator='|'
-while IFS='|' read -r network_name network_signal network_security network_status; do
-    set -- "$@" "$network_name" "$network_signal" "$network_security" "$network_status"
-done <<EOF
+if command -v rofi >/dev/null 2>&1; then
+    menu="$(printf '%s\n' "$networks" | awk -F'|' '
+        function bars(signal) {
+            if (signal >= 75) return "▂▄▆█"
+            if (signal >= 50) return "▂▄▆"
+            if (signal >= 25) return "▂▄"
+            return "▂"
+        }
+        { printf "%s  %s %s%%  %s%s\n", $1, bars($2), $2, ($3 == "Open" ? "Open" : "Secured"), ($4 != "" ? "  • Connected" : "") }
+    ')"
+    active_rows="$(printf '%s\n' "$networks" | awk -F'|' '$4 == "Connected" {printf "%s%d", separator, NR-1; separator=","}')"
+    selected_index="$(printf '%s\n' "$menu" | rofi -theme "$HOME/.config/i3/menu.rasi" -dmenu -i -no-custom -format i -a "$active_rows" -p 'Wi-Fi networks' -mesg 'Search networks · Enter to connect · Esc to close')" || exit 0
+    case "$selected_index" in ''|*[!0-9]*) exit 0 ;; esac
+    selection="$(printf '%s\n' "$networks" | awk -v row="$((selected_index + 1))" 'NR == row {print; exit}')"
+else
+    set -- --list --title='Connect to Wi-Fi' --text='Choose a Wi-Fi network' --width=560 --height=420 --column='Network' --column='Signal' --column='Security' --column='Status' --separator='|'
+    while IFS='|' read -r network_name network_signal network_security network_status; do
+        set -- "$@" "$network_name" "$network_signal" "$network_security" "$network_status"
+    done <<EOF
 $networks
 EOF
-selection="$(zenity "$@")" || exit 0
+    selection="$(zenity "$@")" || exit 0
+fi
+
 ssid="${selection%%|*}"
 remainder="${selection#*|}"
 security="${remainder#*|}"; security="${security%%|*}"

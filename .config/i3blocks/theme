@@ -7,14 +7,20 @@ bar_label() {
     key="$1"
     if [ "$BAR_USE_NERD_ICONS" = 1 ]; then
         case "$key" in
-            wifi) printf '󰤨' ;; ethernet) printf '󰈀' ;; volume) printf '󰕾' ;; mute) printf '󰖁' ;;
-            battery) printf '󰁹' ;; power) printf '󰾅' ;; temperature) printf '' ;;
+            wifi) printf '󰤨' ;; wifi-weak) printf '󰤟' ;; wifi-off) printf '󰤭' ;; ethernet) printf '󰈀' ;;
+            volume) printf '󰕾' ;; volume-low) printf '󰖀' ;; mute) printf '󰖁' ;;
+            microphone) printf '󰍬' ;; microphone-muted) printf '󰍭' ;;
+            battery) printf '󰁹' ;; battery-low) printf '󰂎' ;; battery-charging) printf '󰂄' ;;
+            power) printf '󰾅' ;; temperature) printf '' ;;
             disk) printf '󰋊' ;; cpu) printf '󰻠' ;; memory) printf '' ;; time) printf '󰥔' ;;
         esac
     else
         case "$key" in
-            wifi) printf 'Wi-Fi' ;; ethernet) printf 'Ethernet' ;; volume) printf 'Vol' ;; mute) printf 'Mute' ;;
-            battery) printf 'Bat' ;; power) printf 'Pwr' ;; temperature) printf 'Temp' ;;
+            wifi) printf 'Wi-Fi' ;; wifi-weak) printf 'Wi-Fi' ;; wifi-off) printf 'Wi-Fi off' ;; ethernet) printf 'Ethernet' ;;
+            volume) printf 'Vol' ;; volume-low) printf 'Vol' ;; mute) printf 'Mute' ;;
+            microphone) printf 'Mic' ;; microphone-muted) printf 'Mic muted' ;;
+            battery) printf 'Bat' ;; battery-low) printf 'Bat low' ;; battery-charging) printf 'Charging' ;;
+            power) printf 'Pwr' ;; temperature) printf 'Temp' ;;
             disk) printf 'Disk' ;; cpu) printf 'CPU' ;; memory) printf 'RAM' ;; time) printf 'Clock' ;;
         esac
     fi

@@ -4,6 +4,11 @@ set -eu
 
 has() { command -v "$1" >/dev/null 2>&1; }
 
+notify() {
+    has notify-send || return 0
+    notify-send -r 9125 -u low -t 1500 "$1" "$2"
+}
+
 case "${1:-}" in
     network-applet) has nm-applet && exec nm-applet ;;
     prewarm-terminal) has kitty && exec kitty --single-instance --class kitty-prewarm ;;
@@ -37,17 +42,24 @@ case "${1:-}" in
     volume)
         has wpctl || exit 0
         case "${2:-}" in
-            up) exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%+ ;;
-            down) exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%- ;;
-            mute) exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
-            mic-mute) exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
+            up) wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%+ ;;
+            down) wpctl set-volume @DEFAULT_AUDIO_SINK@ 10%- ;;
+            mute) wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+            mic-mute) wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle; notify 'Microphone' 'Mute toggled'; exit 0 ;;
+            *) exit 2 ;;
         esac
+        volume_state="$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null || true)"
+        if printf '%s\n' "$volume_state" | grep -q '\[MUTED\]'; then notify 'Volume' 'Muted'; else notify 'Volume' "$(printf '%s\n' "$volume_state" | awk 'NF >= 2 {printf "%.0f%%", $2 * 100}')"; fi
         ;;
     brightness)
         has brightnessctl || exit 0
-        case "${2:-}" in up) exec brightnessctl set +5% ;; down) exec brightnessctl set 5%- ;; esac
+        case "${2:-}" in up) brightnessctl set +5% ;; down) brightnessctl set 5%- ;; *) exit 2 ;; esac
+        notify 'Brightness' "$(brightnessctl -m 2>/dev/null | awk -F, 'NR == 1 {print $4}')"
         ;;
     power-profile)
-        has powerprofilesctl && exec powerprofilesctl set "${2:?profile required}"
+        has powerprofilesctl || exit 0
+        profile="${2:?profile required}"
+        powerprofilesctl set "$profile"
+        notify 'Power profile' "$profile"
         ;;
 esac

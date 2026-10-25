@@ -10,13 +10,14 @@ Review the profile, then run one of:
 
 ```sh
 ./install.sh --check    # syntax and portability checks
+./install.sh --deps     # show required and optional programs
 ./install.sh --dry-run  # show what would be installed
 ./install.sh --apply    # back up and copy the profile into ~/.config
 ```
 
-`--apply` creates a timestamped backup at `~/.i3-dotfiles-backup-*` before
-updating i3, i3blocks, Kitty, GTK and Zsh files. It copies directory contents,
-so a local file not managed by this repository is retained.
+`--apply` creates a unique timestamped backup at `~/.i3-dotfiles-backup-*`
+before updating i3, i3blocks, Kitty, GTK and Zsh files. It copies directory
+contents, so a local file not managed by this repository is retained.
 
 ## Portable behavior
 
@@ -32,6 +33,22 @@ so a local file not managed by this repository is retained.
 - Optional features (audio controls, brightness, power profiles, Wi-Fi menu,
   wallpaper and lock-screen enhancements) simply stay unavailable when their
   supporting command does not exist.
+
+## Everyday controls
+
+Desktop menus share the palette, spacing and selection styles in
+`.config/i3/menu.rasi`. This theme also applies to the application launcher.
+
+- `Super+Shift+/` opens the keyboard-shortcut reference.
+- `Super+Ctrl+Space` opens quick controls for Wi-Fi, audio, brightness, power,
+  display layout, lock and session actions.
+- `Super+Shift+M` switches a connected secondary display between horizontal
+  and vertical placement. The choice remains active while i3 is running.
+- Volume, brightness and power-profile keys show a brief notification when
+  `notify-send` is available.
+- Click the network block to choose a Wi-Fi network from a compact Rofi list
+  showing signal strength, security and the current connection. Wired Ethernet
+  is shown first whenever it is active.
 
 ## Customize a machine
 
@@ -55,5 +72,5 @@ different.
 Core: `i3`, `i3blocks`, `xrandr` and a POSIX shell.
 
 Useful optional programs: `NetworkManager` (`nmcli`, `nm-applet`), `zenity`,
-`wpctl`, `brightnessctl`, `powerprofilesctl`, `lm-sensors`, `xinput`, `feh`,
+`libnotify` (`notify-send`), `wpctl`, `brightnessctl`, `powerprofilesctl`, `lm-sensors`, `xinput`, `feh`,
 `rofi`, `kitty`, `jq`, `i3lock` and a Nerd Font.

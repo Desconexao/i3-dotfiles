@@ -1,20 +1,29 @@
 # Appearance is centralized in ../i3/bar-theme.conf and labels/icons in ./theme.
 # BLOCK SPACING — change this number to adjust the horizontal space between blocks.
-separator=true
-separator_block_width=14
-color=#cdd6f4
-background=#1e1e2e
+separator=false
+separator_block_width=8
+color=#d5def1
+background=#101522
+border=#343c57
+border_top=0
+border_bottom=0
+border_left=0
+border_right=0
 
-[wifi]
-command=$HOME/.config/i3blocks/status wifi
-interval=10
+[controls]
+command=$HOME/.config/i3blocks/status controls
+interval=once
 
-[ethernet]
-command=$HOME/.config/i3blocks/status ethernet
+[network]
+command=$HOME/.config/i3blocks/status network
 interval=10
 
 [volume]
 command=$HOME/.config/i3blocks/status volume
+interval=1
+
+[microphone]
+command=$HOME/.config/i3blocks/status microphone
 interval=1
 
 [battery]

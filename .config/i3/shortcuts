@@ -1,0 +1,22 @@
+#!/bin/sh
+# A compact, read-only shortcut reference opened from i3.
+
+shortcuts='Quick controls           Super + Ctrl + Space
+Open terminal            Super + Enter
+App launcher              Super + D
+Browser                   Super + B
+File manager              Super + F
+Lock screen               Super + Shift + X
+Power menu                Super + Shift + P
+Display layout            Super + Shift + M
+Move window               Super + Shift + J/K/L/Ç
+Move to workspace         Super + Shift + 1–0
+Resize mode               Super + R
+Reload i3                 Super + Shift + C
+Restart i3                Super + Shift + R'
+
+if command -v rofi >/dev/null 2>&1; then
+    printf '%s\n' "$shortcuts" | rofi -theme "$HOME/.config/i3/menu.rasi" -dmenu -i -no-custom -p 'Keyboard shortcuts' -mesg 'Type to find a shortcut · Esc to close'
+elif command -v zenity >/dev/null 2>&1; then
+    zenity --info --title='Keyboard shortcuts' --width=520 --text="$shortcuts"
+fi

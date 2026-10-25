@@ -5,32 +5,18 @@ set -eu
 has() { command -v "$1" >/dev/null 2>&1; }
 has xrandr && has i3-msg && has jq || exit 0
 
+script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+. "$script_dir/display-outputs.sh"
+
 override_file="$HOME/.config/i3/display.local.conf"
 [ ! -r "$override_file" ] || . "$override_file"
 
-connected_outputs() {
-    xrandr --query 2>/dev/null | awk '$2 == "connected" {print $1}'
-}
+runtime_dir="${XDG_RUNTIME_DIR:-/tmp}"
+layout_file="$runtime_dir/i3-display-layout"
 
-# Choose the connected display with the highest refresh rate at its largest
-# available resolution. This makes a 144 Hz monitor win when Xrandr has lost
-# the primary flag during boot.
-best_connected_output() {
-    xrandr --query 2>/dev/null | awk '
-        function finish() {
-            if (output != "" && (pixels > selected_pixels || (pixels == selected_pixels && rate > selected_rate))) {
-                selected = output; selected_pixels = pixels; selected_rate = rate
-            }
-        }
-        $2 == "connected" { finish(); output = $1; pixels = 0; rate = 0; next }
-        $2 == "disconnected" { finish(); output = ""; next }
-        output != "" && /^[[:space:]]+[0-9]+x[0-9]+/ {
-            split($1, size, "x"); mode_pixels = size[1] * size[2]; mode_rate = 0
-            for (i = 2; i <= NF; i++) { value = $i; gsub(/[+*]/, "", value); if (value + 0 > mode_rate) mode_rate = value + 0 }
-            if (mode_pixels > pixels || (mode_pixels == pixels && mode_rate > rate)) { pixels = mode_pixels; rate = mode_rate }
-        }
-        END { finish(); print selected }
-    '
+layout_mode() {
+    [ -r "$layout_file" ] && IFS= read -r mode < "$layout_file" || mode=horizontal
+    case "$mode" in horizontal|vertical) printf '%s\n' "$mode" ;; *) printf '%s\n' horizontal ;; esac
 }
 
 best_mode_and_rate() {
@@ -44,10 +30,6 @@ best_mode_and_rate() {
         }
         END { if (mode != "") print mode, best_rate }
     '
-}
-
-main_output() {
-    xrandr --query 2>/dev/null | awk '$2 == "connected" && / primary/ {print $1; exit}'
 }
 
 highest_mode() {
@@ -68,10 +50,6 @@ apply_layout() {
     [ -n "$outputs" ] || return 0
 
     main="$(main_output)"
-    if [ -z "$main" ]; then
-        main="$(best_connected_output)"
-    fi
-    [ -n "$main" ] || main="$(printf '%s\n' "$outputs" | head -n 1)"
     secondary="$(printf '%s\n' "$outputs" | awk -v main="$main" '$0 != main {print; exit}')"
 
     set -- $(best_mode_and_rate "$main")
@@ -82,11 +60,17 @@ apply_layout() {
     fi
 
     if [ -n "$secondary" ]; then
-        mode="${SECONDARY_MODE:-$(highest_mode "$secondary")}"
-        if [ -n "$mode" ]; then
-            xrandr --output "$secondary" --mode "$mode" --right-of "$main" 2>/dev/null || xrandr --output "$secondary" --auto --right-of "$main" 2>/dev/null || true
+        mode="${SECONDARY_MODE:-$(highest_mode "$secondary")}" 
+        layout="$(layout_mode)"
+        if [ "$layout" = vertical ]; then
+            placement="--below"
         else
-            xrandr --output "$secondary" --auto --right-of "$main" 2>/dev/null || true
+            placement="--right-of"
+        fi
+        if [ -n "$mode" ]; then
+            xrandr --output "$secondary" --mode "$mode" "$placement" "$main" 2>/dev/null || xrandr --output "$secondary" --auto "$placement" "$main" 2>/dev/null || true
+        else
+            xrandr --output "$secondary" --auto "$placement" "$main" 2>/dev/null || true
         fi
         target="$secondary"
     else
@@ -104,7 +88,10 @@ apply_layout() {
     [ -z "$focused" ] || i3-msg -q "workspace \"$focused\""
 }
 
-if [ "${1:-}" = --watch ]; then
+if [ "${1:-}" = --toggle ]; then
+    case "$(layout_mode)" in horizontal) printf '%s\n' vertical > "$layout_file" ;; *) printf '%s\n' horizontal > "$layout_file" ;; esac
+    apply_layout
+elif [ "${1:-}" = --watch ]; then
     # i3 may start this again after reload; keep only one event subscriber.
     has flock || exit 0
     runtime_dir="${XDG_RUNTIME_DIR:-/tmp}"

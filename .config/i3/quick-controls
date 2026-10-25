@@ -1,0 +1,65 @@
+#!/bin/sh
+# Visual launcher for the daily actions that do not deserve a memorized shortcut.
+
+has() { command -v "$1" >/dev/null 2>&1; }
+
+menu='󰤨   Network
+󰕾   Sound
+󰃞   Brightness
+󰾅   Power profile
+󰍹   Displays
+󰐥   Session'
+
+submenu() {
+    if has rofi; then
+        printf '%s\n' "$3" | rofi -theme "$HOME/.config/i3/menu.rasi" -dmenu -i -no-custom -p "$1" -mesg "$2"
+    else
+        printf '%s\n' "$3" | zenity --list --title="$1" --column='Action'
+    fi
+}
+
+if has rofi; then
+    choice="$(submenu 'Control center' 'Your desktop, within reach' "$menu")" || exit 0
+else
+    choice="$(printf '%s\n' "$menu" | zenity --list --title='Quick controls' --column='Action')" || exit 0
+fi
+
+case "$choice" in
+    *Network) exec "$HOME/.config/i3blocks/wifi-menu" ;;
+    *Sound)
+        choice="$(submenu 'Sound' 'Output volume and microphone' '󰕾  Volume up
+󰖀  Volume down
+󰖁  Toggle mute
+󰍬  Microphone mute')" || exit 0
+        ;;
+    *Brightness)
+        choice="$(submenu 'Brightness' 'Screen backlight' '󰃞  Brightness up
+󰃟  Brightness down')" || exit 0
+        ;;
+    *'Power profile')
+        current="$(powerprofilesctl get 2>/dev/null || printf '%s' unavailable)"
+        choice="$(submenu 'Power profile' "Current: $current" '󰌪  Power saver
+󰾅  Balanced power
+󱐋  Performance power')" || exit 0
+        ;;
+    *Displays)
+        choice="$(submenu 'Displays' 'Switch between side-by-side and stacked screens' '󰍹  Toggle display layout')" || exit 0
+        ;;
+    *Session) exec "$HOME/.config/i3/power-menu" ;;
+esac
+
+case "$choice" in
+    *'Wi-Fi networks') exec "$HOME/.config/i3blocks/wifi-menu" ;;
+    *'Volume up') exec "$HOME/.config/i3/session-tools" volume up ;;
+    *'Volume down') exec "$HOME/.config/i3/session-tools" volume down ;;
+    *'Toggle mute') exec "$HOME/.config/i3/session-tools" volume mute ;;
+    *'Microphone mute') exec "$HOME/.config/i3/session-tools" volume mic-mute ;;
+    *'Brightness up') exec "$HOME/.config/i3/session-tools" brightness up ;;
+    *'Brightness down') exec "$HOME/.config/i3/session-tools" brightness down ;;
+    *'Power saver') exec "$HOME/.config/i3/session-tools" power-profile power-saver ;;
+    *'Balanced power') exec "$HOME/.config/i3/session-tools" power-profile balanced ;;
+    *'Performance power') exec "$HOME/.config/i3/session-tools" power-profile performance ;;
+    *'Toggle display layout') exec "$HOME/.config/i3/update-workspace-outputs.sh" --toggle ;;
+    *'Lock screen') exec "$HOME/.config/i3/lock-screen" ;;
+    *'Power menu') exec "$HOME/.config/i3/power-menu" ;;
+esac

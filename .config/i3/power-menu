@@ -1,18 +1,24 @@
 #!/bin/sh
 
-choice="$(printf '%s\n' 'Lock' 'Log out' 'Restart' 'Power off' | rofi -dmenu -i -p 'Power')"
+theme="$HOME/.config/i3/menu.rasi"
+choice="$(printf '%s\n' '󰌾   Lock' '󰍃   Log out' '󰜉   Restart' '󰐥   Power off' | rofi -theme "$theme" -dmenu -i -no-custom -format i -p 'Session' -mesg 'Take a break, or call it a day')" || exit 0
+
+confirm() {
+    answer="$(printf '%s\n' 'Cancel' "$1" | rofi -theme "$theme" -dmenu -i -no-custom -p 'Confirm' -mesg "$2")" || return 1
+    [ "$answer" = "$1" ]
+}
 
 case "$choice" in
-    Lock)
+    0)
         exec "$HOME/.config/i3/lock-screen"
         ;;
-    'Log out')
-        zenity --question --title='Log out' --text='Log out of this session?' && i3-msg exit
+    1)
+        confirm 'Log out' 'Close your applications before ending this session.' && i3-msg exit
         ;;
-    Restart)
-        zenity --question --title='Restart' --text='Restart the computer?' && systemctl reboot
+    2)
+        confirm 'Restart' 'Save your work before restarting the computer.' && systemctl reboot
         ;;
-    'Power off')
-        zenity --question --title='Power off' --text='Power off the computer?' && systemctl poweroff
+    3)
+        confirm 'Power off' 'Save your work before turning off the computer.' && systemctl poweroff
         ;;
 esac

@@ -12,6 +12,9 @@ done
 for file in \
     .config/i3/config \
     .config/i3/bar-theme.conf \
+    .config/i3/display-outputs.sh \
+    .config/i3/quick-controls \
+    .config/i3/shortcuts \
     .config/i3/session-tools \
     .config/i3/display.local.conf.example \
     .config/i3/window-gaps.conf \
@@ -29,7 +32,10 @@ if rg -n '/home/[[:alnum:]_-]+|BAT0|HDMI-[0-9]|eDP-[0-9]|VEN_[0-9A-F]+' "$repo_d
 fi
 
 if command -v i3 >/dev/null 2>&1; then
-    i3 -C -c "$HOME/.config/i3/config"
+    test_home="$(mktemp -d)"
+    trap 'rm -rf "$test_home"' EXIT HUP INT TERM
+    ln -s "$repo_dir/.config" "$test_home/.config"
+    HOME="$test_home" XDG_RUNTIME_DIR="$test_home" i3 -C -c "$repo_dir/.config/i3/config"
 fi
 
 printf '%s\n' 'smoke: ok'
