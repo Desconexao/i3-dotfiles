@@ -8,6 +8,7 @@ menu='󰤨   Network
 󰃞   Brightness
 󰾅   Power profile
 󰍹   Displays
+󰸉   Wallpaper
 󰐥   Session'
 
 submenu() {
@@ -45,6 +46,7 @@ case "$choice" in
     *Displays)
         choice="$(submenu 'Displays' 'Switch between side-by-side and stacked screens' '󰍹  Toggle display layout')" || exit 0
         ;;
+    *Wallpaper) exec "$HOME/.config/i3/wallpaper-picker" ;;
     *Session) exec "$HOME/.config/i3/power-menu" ;;
 esac
 

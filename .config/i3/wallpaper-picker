@@ -1,0 +1,37 @@
+#!/bin/sh
+# Keep a local copy so wallpapers are available before external disks mount.
+set -eu
+
+error() {
+    zenity --error --no-markup --title='Wallpaper' --text="$1"
+}
+
+command -v zenity >/dev/null 2>&1 || exit 1
+command -v feh >/dev/null 2>&1 || { error 'Install feh to set a wallpaper.'; exit 1; }
+
+image="$(zenity --file-selection --title='Choose your wallpaper' \
+    --filename="$HOME/Pictures/" \
+    --file-filter='Images | *.jpg *.jpeg *.png *.webp *.bmp *.JPG *.JPEG *.PNG *.WEBP *.BMP' \
+    --file-filter='All files | *')" || exit 0
+[ -n "$image" ] || exit 0
+[ -f "$image" ] && [ -r "$image" ] || { error 'This image cannot be read.'; exit 1; }
+
+cache_dir="$HOME/.local/share/i3/wallpaper"
+config_dir="$HOME/.config/i3"
+mkdir -p "$cache_dir" "$config_dir"
+candidate="$(mktemp "$cache_dir/.image-XXXXXX")"
+setting=""
+trap 'rm -f -- "$candidate"; [ -z "$setting" ] || rm -f -- "$setting"' EXIT
+trap 'exit 1' HUP INT TERM
+cp -- "$image" "$candidate"
+if ! feh --no-fehbg --bg-fill "$candidate"; then
+    error 'This file could not be opened as a wallpaper. Choose another image.'
+    exit 1
+fi
+mv -f -- "$candidate" "$cache_dir/current"
+setting="$(mktemp "$config_dir/.wallpaper-XXXXXX")"
+printf '%s\n' "$cache_dir/current" > "$setting"
+mv -f -- "$setting" "$config_dir/wallpaper"
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send -u low -t 2500 'Wallpaper updated' 'Your selection will be restored next time you sign in.' || true
+fi

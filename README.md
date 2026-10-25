@@ -42,6 +42,8 @@ Desktop menus share the palette, spacing and selection styles in
 - `Super+Shift+/` opens the keyboard-shortcut reference.
 - `Super+Ctrl+Space` opens quick controls for Wi-Fi, audio, brightness, power,
   display layout, lock and session actions.
+- Choose **Wallpaper** in quick controls to select an image. A local copy is
+  saved and restored on login, including when the original image is on a hard drive.
 - `Super+Shift+M` switches a connected secondary display between horizontal
   and vertical placement. The choice remains active while i3 is running.
 - Volume, brightness and power-profile keys show a brief notification when
@@ -58,7 +60,7 @@ Desktop menus share the palette, spacing and selection styles in
 | Bar labels, icons and spacing | `.config/i3blocks/theme` |
 | Window title font | `.config/i3/config` (`font ...`) |
 | Spacing between windows | `.config/i3/window-gaps.conf` |
-| Wallpaper | Create `~/.config/i3/wallpaper` containing one absolute image path |
+| Wallpaper | Quick controls → Wallpaper; saved selection in `~/.config/i3/wallpaper` |
 | Launchers and media keys | `.config/i3/session-tools` |
 | Workspace display policy | `.config/i3/update-workspace-outputs.sh` |
 | A machine-specific external resolution | `~/.config/i3/display.local.conf` |

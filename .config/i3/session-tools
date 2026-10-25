@@ -37,7 +37,7 @@ case "${1:-}" in
         wallpaper_file="$HOME/.config/i3/wallpaper"
         [ -r "$wallpaper_file" ] || exit 0
         IFS= read -r wallpaper_path < "$wallpaper_file" || exit 0
-        [ -f "$wallpaper_path" ] && has feh && exec feh --bg-fill "$wallpaper_path"
+        [ -f "$wallpaper_path" ] && has feh && exec feh --no-fehbg --bg-fill "$wallpaper_path"
         ;;
     volume)
         has wpctl || exit 0
