@@ -1,7 +1,7 @@
 # Appearance is centralized in ../i3/bar-theme.conf and labels/icons in ./theme.
 # BLOCK SPACING — change this number to adjust the horizontal space between blocks.
 separator=false
-separator_block_width=8
+separator_block_width=2
 color=#d5def1
 background=#101522
 border=#343c57
@@ -40,6 +40,10 @@ interval=10
 
 [disk]
 command=$HOME/.config/i3blocks/status disk
+interval=30
+
+[dlinux]
+command=$HOME/.config/i3blocks/status dlinux
 interval=30
 
 [cpu]

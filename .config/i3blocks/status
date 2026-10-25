@@ -9,7 +9,7 @@ controls)
     if [ -n "${BLOCK_BUTTON:-}" ]; then
         "$HOME/.config/i3/quick-controls" >/dev/null 2>&1 &
     fi
-    printf '  󰒓  \n  󰒓  \n'
+    printf ' 󰒓 \n 󰒓 \n'
     ;;
 network)
     case "${BLOCK_BUTTON:-}" in
@@ -59,9 +59,9 @@ microphone)
     if [ -z "$audio" ]; then
         exit 0
     elif printf '%s\n' "$audio" | grep -q '\[MUTED\]'; then
-        printf '  %s  \n  %s  \n' "$(bar_label microphone-muted)" "$(bar_label microphone-muted)"
+        printf ' %s \n %s \n' "$(bar_label microphone-muted)" "$(bar_label microphone-muted)"
     else
-        printf '  %s  \n  %s  \n' "$label" "$label"
+        printf ' %s \n %s \n' "$label" "$label"
     fi
     ;;
 battery)
@@ -95,8 +95,20 @@ temperature)
     fi
     if [ -n "$value" ]; then printf '  %s %s°C  \n  %s°C  \n' "$label" "$value" "$value"; fi
     ;;
-disk)
-    value="$(df -h / | awk 'NR == 2 {print $4}')"; printf '  %s %s free  \n  %s  \n' "$label" "$value" "$value"
+disk|dlinux)
+    if [ "${BLOCK_BUTTON:-}" = 1 ]; then
+        "$HOME/.config/i3/storage-menu" >/dev/null 2>&1 &
+    fi
+    if [ "$block" = dlinux ]; then
+        mountpoint -q /mnt/DLinux || exit 0
+        target=/mnt/DLinux
+        name=DLinux
+    else
+        target=/
+        name=System
+    fi
+    value="$(df -h --output=avail "$target" | awk 'NR == 2 {print $1}')"
+    printf '  %s %s %s free  \n  %s %s  \n' "$(bar_label disk)" "$name" "$value" "$name" "$value"
     ;;
 cpu)
     value="$(awk '{print $1}' /proc/loadavg)"; printf '  %s %s  \n  %s  \n' "$label" "$value" "$value"

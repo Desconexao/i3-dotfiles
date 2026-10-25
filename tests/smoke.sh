@@ -15,6 +15,7 @@ for file in \
     .config/i3/display-outputs.sh \
     .config/i3/quick-controls \
     .config/i3/shortcuts \
+    .config/i3/storage-menu \
     .config/i3/session-tools \
     .config/i3/display.local.conf.example \
     .config/i3/window-gaps.conf \

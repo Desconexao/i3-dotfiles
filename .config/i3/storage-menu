@@ -1,0 +1,20 @@
+#!/bin/sh
+# Display each mounted disk filesystem once, including separate home partitions.
+summary="$(LC_ALL=C df -h --output=source,size,avail,pcent,target -x tmpfs -x devtmpfs | awk '
+    $1 ~ /^\/dev\// && !seen[$1]++ {
+        name = $5
+        sub(/^.*\//, "", name)
+        if ($5 == "/") name = "System"
+        else if ($5 == "/home") name = "Home"
+        else if ($5 == "/mnt/DLinux") name = "DLinux"
+        printf "%-12s %7s free / %7s total   %s used\n", name, $3, $2, $4
+    }
+')"
+
+if command -v rofi >/dev/null 2>&1; then
+    printf '%s\n' "$summary" | rofi -theme "$HOME/.config/i3/menu.rasi" \
+        -theme-str '* { font: "JetBrainsMono Nerd Font 10"; } window { width: 680px; }' \
+        -dmenu -i -no-custom -p 'Storage' -mesg 'Available space on mounted disks · Esc to close' >/dev/null
+elif command -v zenity >/dev/null 2>&1; then
+    zenity --info --no-markup --title='Storage' --width=600 --text="$summary"
+fi
