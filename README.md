@@ -14,6 +14,7 @@ Kitty, GTK and Zsh.
 - Wallpaper picker with a local image copy restored on login.
 - Automatic workspace placement across one or two displays.
 - Configuration backups before installation.
+- Flat mouse acceleration profile applied on i3 startup and reload.
 
 ## Installation
 

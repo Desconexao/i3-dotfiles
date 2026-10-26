@@ -28,6 +28,24 @@ case "${1:-}" in
         ;;
     configure-input)
         has xinput || exit 0
+        # Use constant mouse sensitivity. Detect profile length for both older
+        # libinput drivers and drivers with the additional custom profile.
+        xinput list --short | awk '/slave[[:space:]]+pointer/ {for (i = 1; i <= NF; i++) if ($i ~ /^id=/) {sub(/^id=/, "", $i); print $i}}' | while IFS= read -r device_id; do
+            properties="$(xinput list-props "$device_id" 2>/dev/null || true)"
+            printf '%s\n' "$properties" | grep -q 'libinput Tapping Enabled' && continue
+            flat_profile="$(printf '%s\n' "$properties" | awk '
+                /libinput Accel Profiles Available \(/ {
+                    sub(/^.*:[[:space:]]*/, "")
+                    count = split($0, profiles, /,[[:space:]]*/)
+                    if (profiles[2] + 0 == 1) {
+                        for (i = 1; i <= count; i++) printf "%s%d", (i == 1 ? "" : " "), (i == 2 ? 1 : 0)
+                    }
+                }
+            ')"
+            [ -n "$flat_profile" ] || continue
+            set -- $flat_profile
+            xinput set-prop "$device_id" 'libinput Accel Profile Enabled' "$@" 2>/dev/null || true
+        done
         xinput list --name-only 2>/dev/null | awk '/[Tt]ouchpad/' | while IFS= read -r device; do
             xinput set-prop "$device" 'libinput Tapping Enabled' 1 2>/dev/null || true
             xinput set-prop "$device" 'libinput Natural Scrolling Enabled' 1 2>/dev/null || true
