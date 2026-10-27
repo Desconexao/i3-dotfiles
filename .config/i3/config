@@ -48,6 +48,7 @@ exec --no-startup-id ~/.config/i3/session-tools prewarm-terminal
 
 exec_always --no-startup-id ~/.config/i3/session-tools configure-input
 exec_always --no-startup-id ~/.config/i3/session-tools wallpaper
+exec_always --no-startup-id ~/.config/i3/session-tools compositor
 
 
 
@@ -77,6 +78,7 @@ bindsym $mod+b exec --no-startup-id ~/.config/i3/session-tools browser
 
 # Open the default Files application
 bindsym $mod+f exec --no-startup-id ~/.config/i3/session-tools files
+bindsym $mod+Control+f exec --no-startup-id ~/.config/i3/file-search
 
 # Open the power menu
 bindsym $mod+Shift+p exec --no-startup-id ~/.config/i3/power-menu

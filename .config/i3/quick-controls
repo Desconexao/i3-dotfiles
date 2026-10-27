@@ -3,7 +3,8 @@
 
 has() { command -v "$1" >/dev/null 2>&1; }
 
-menu='󰤨   Network
+menu='󰈞   Find files
+󰤨   Network
 󰕾   Sound
 󰃞   Brightness
 󰾅   Power profile
@@ -26,6 +27,7 @@ else
 fi
 
 case "$choice" in
+    *'Find files') exec "$HOME/.config/i3/file-search" ;;
     *Network) exec "$HOME/.config/i3blocks/wifi-menu" ;;
     *Sound)
         choice="$(submenu 'Sound' 'Output volume and microphone' '󰕾  Volume up

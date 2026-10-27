@@ -10,6 +10,13 @@ notify() {
 }
 
 case "${1:-}" in
+    compositor)
+        has picom && has flock || exit 0
+        runtime_dir="${XDG_RUNTIME_DIR:-/tmp}"
+        exec 9>"$runtime_dir/i3-picom-$(id -u).lock"
+        flock -n 9 || exit 0
+        exec picom --config "$HOME/.config/i3/picom.conf" --log-file "$runtime_dir/i3-picom-$(id -u).log"
+        ;;
     network-applet) has nm-applet && exec nm-applet ;;
     prewarm-terminal) has kitty && exec kitty --single-instance --class kitty-prewarm ;;
     terminal)
@@ -18,6 +25,7 @@ case "${1:-}" in
         ;;
     browser)
         if [ -n "${BROWSER:-}" ] && has "$BROWSER"; then exec "$BROWSER"; fi
+        if has brave; then exec brave; fi
         if has brave-browser; then exec brave-browser; fi
         if has firefox; then exec firefox; fi
         ;;

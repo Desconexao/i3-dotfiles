@@ -1,0 +1,36 @@
+@import "menu.rasi"
+
+/* File search stays neutral and denser than the desktop action menus. */
+* {
+    font: "Noto Sans 11";
+    text-color: #dedede;
+    border-color: #383838;
+}
+window {
+    width: 760px;
+    background-color: #161616;
+    border: 1px;
+    border-radius: 12px;
+    padding: 18px;
+}
+mainbox { spacing: 12px; }
+inputbar { background-color: #222222; padding: 12px; border-radius: 7px; }
+prompt { text-color: #eeeeee; font: "Noto Sans Bold 11"; }
+entry { text-color: #eeeeee; placeholder: "Filename or folder…"; placeholder-color: #858585; }
+textbox { text-color: #999999; }
+message { padding: 0px 2px; }
+listview { lines: 10; spacing: 3px; }
+element { padding: 9px 11px; border: 0px; border-radius: 5px; }
+element normal.normal, element alternate.normal,
+element normal.active, element alternate.active,
+element normal.urgent, element alternate.urgent {
+    background-color: #161616;
+    text-color: #c9c9c9;
+}
+element selected.normal, element selected.active, element selected.urgent {
+    background-color: #353535;
+    text-color: #ffffff;
+    border-color: #535353;
+}
+element-text { highlight: bold underline; }
+scrollbar { background-color: #222222; handle-color: #555555; }

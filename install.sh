@@ -10,7 +10,7 @@ case "$mode" in
     --deps)
         printf '%s\n' 'Core: i3 i3blocks xrandr jq'
         printf '%s\n' 'Recommended: kitty NetworkManager zenity libnotify wpctl brightnessctl power-profiles-daemon lm_sensors xinput feh rofi i3lock'
-        printf '%s\n' 'Optional: dex xss-lock pavucontrol ImageMagick i3lock-color-git and a Nerd Font'
+        printf '%s\n' 'Optional: picom dex xss-lock pavucontrol ImageMagick i3lock-color-git and a Nerd Font'
         exit 0
         ;;
     --dry-run|--apply) ;;

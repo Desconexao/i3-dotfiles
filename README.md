@@ -8,6 +8,7 @@ Kitty, GTK and Zsh.
 
 - Dark Rofi theme shared by the application launcher and desktop menus.
 - Control center for network, audio, brightness, power, displays and wallpaper.
+- Filename search with text filtering and shortcuts to open files or folders.
 - Compact, neutral status bar with volume and microphone mute controls.
 - Wired-first network indicator and a Wi-Fi selector with signal strength.
 - Storage indicators with a clickable summary of mounted disks.
@@ -15,6 +16,7 @@ Kitty, GTK and Zsh.
 - Automatic workspace placement across one or two displays.
 - Configuration backups before installation.
 - Flat mouse acceleration profile applied on i3 startup and reload.
+- Optional short workspace fades through Picom, without blur or transparency.
 
 ## Installation
 
@@ -66,6 +68,7 @@ layout; adjust them in `.config/i3/config` for your keyboard.
 | `Super+D` | Application launcher |
 | `Super+B` | Open browser |
 | `Super+F` | Open file manager |
+| `Super+Ctrl+F` | Find files |
 | `Super+Ctrl+Space` | Control center |
 | `Super+Shift+/` | Shortcut reference |
 | `Super+1–0` | Switch workspace |
@@ -79,6 +82,12 @@ layout; adjust them in `.config/i3/config` for your keyboard.
 
 Desktop menus share the palette, spacing and selection styles in
 `.config/i3/menu.rasi`. This theme also applies to the application launcher.
+
+- **Find files** searches filenames in your home directory, including linked
+  folders on other disks. Type to filter, press Enter to open the selected file
+  in its default application, or Alt+Enter to open its containing folder.
+  Hidden files and common dependency directories are excluded; this searches
+  filenames, not file contents. The search respects ripgrep ignore rules.
 
 - Choose **Wallpaper** in quick controls to select an image. A local copy is
   saved and restored on login, including when the original image is on a hard drive.
@@ -100,6 +109,8 @@ Desktop menus share the palette, spacing and selection styles in
 | Bar labels, icons and spacing | `.config/i3blocks/theme` |
 | Status block spacing and order | `.config/i3blocks/config` |
 | Desktop menu appearance | `.config/i3/menu.rasi` |
+| File search appearance | `.config/i3/file-search.rasi` |
+| Workspace fade timing | `.config/i3/picom.conf` |
 | Window title font | `.config/i3/config` (`font ...`) |
 | Spacing between windows | `.config/i3/window-gaps.conf` |
 | Wallpaper | Quick controls → Wallpaper; saved selection in `~/.config/i3/wallpaper` |
@@ -119,6 +130,7 @@ Validation also requires `ripgrep` (`rg`).
 | Feature | Programs |
 | --- | --- |
 | Menus and image selection | `rofi`, `zenity` |
+| File search | `rg` (ripgrep), `rofi`, `xdg-open` |
 | Terminal | `kitty` or `i3-sensible-terminal` |
 | Network controls | NetworkManager (`nmcli`, `nm-applet`, `nm-connection-editor`) |
 | Audio | `wpctl`; `pavucontrol` for advanced settings |
@@ -130,6 +142,7 @@ Validation also requires `ripgrep` (`rg`).
 | Temperature | `sensors` from lm-sensors |
 | Touchpad setup | `xinput` |
 | Desktop autostart | `dex` |
+| Workspace fades | `picom` |
 
 `./install.sh --deps` lists dependency suggestions. Package names vary between
 distributions; install the programs needed by the features you use.
