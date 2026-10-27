@@ -23,6 +23,14 @@ font pango:JetBrainsMono Nerd Font 10
 # Window-title position: left, center or right.
 title_align center
 
+# Neutral window decorations: border, background, text, indicator, child border.
+client.focused          #444444 #151515 #eeeeee #777777 #444444
+client.focused_inactive #222222 #080808 #aaaaaa #333333 #222222
+client.unfocused        #181818 #080808 #888888 #222222 #181818
+client.urgent           #aaaaaa #303030 #ffffff #aaaaaa #aaaaaa
+client.placeholder      #222222 #080808 #aaaaaa #333333 #222222
+client.background       #080808
+
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:DejaVu Sans Mono 8

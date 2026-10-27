@@ -2,9 +2,9 @@
 # BLOCK SPACING — change this number to adjust the horizontal space between blocks.
 separator=false
 separator_block_width=2
-color=#d5def1
-background=#101522
-border=#343c57
+color=#dddddd
+background=#080808
+border=#333333
 border_top=0
 border_bottom=0
 border_left=0

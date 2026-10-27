@@ -6,7 +6,7 @@ Kitty, GTK and Zsh.
 
 ## Features
 
-- Dark Rofi theme shared by the application launcher and desktop menus.
+- Black and gray theme shared by desktop menus, window decorations and the bar.
 - Control center for network, audio, brightness, power, displays and wallpaper.
 - Filename search with text filtering and shortcuts to open files or folders.
 - Compact, neutral status bar with volume and microphone mute controls.
@@ -109,6 +109,7 @@ Desktop menus share the palette, spacing and selection styles in
 | Bar labels, icons and spacing | `.config/i3blocks/theme` |
 | Status block spacing and order | `.config/i3blocks/config` |
 | Desktop menu appearance | `.config/i3/menu.rasi` |
+| GTK 3 dialog appearance | `.config/gtk-3.0/gtk.css` |
 | File search appearance | `.config/i3/file-search.rasi` |
 | Workspace fade timing | `.config/i3/picom.conf` |
 | Window title font | `.config/i3/config` (`font ...`) |
